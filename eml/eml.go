@@ -16,6 +16,12 @@ func main() {
 		{
 			Name:  "ingest",
 			Usage: "convert .txt and .html templates to .go file",
+			Action: func(c *cli.Context) error {
+				dir := c.String("templatedir")
+				packageName := c.String("packagename")
+				file := c.String("file")
+				return emailtemplates.WriteTemplatesToFile(file, dir, packageName)
+			},
 			Flags: []cli.Flag{
 				cli.StringFlag{
 					Name:  "templatedir",
@@ -32,12 +38,6 @@ func main() {
 					Value: "templates.go",
 					Usage: "file name to use for the generated .go file",
 				},
-			},
-			Action: func(c *cli.Context) error {
-				dir := c.String("dir")
-				packageName := c.String("packagename")
-				file := c.String("file")
-				return emailtemplates.WriteTemplatesToFile(file, dir, packageName)
 			},
 		},
 	}
