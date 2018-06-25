@@ -1,15 +1,17 @@
+// Package emailtemplates provides a tool for reading txt and html files from the filesystem and
+// turning them into .go source files that can be compiled into your application.
+
 package emailtemplates
 
 import (
+	"bytes"
+	"go/format"
 	"io"
 	"strconv"
 	"text/template"
 )
 
-// ProtoTemplate stores the raw template strings, as read from the txt/html files on the filesystem.
-// A slice of these is included in the context fed into the template render call that generates the
-// Go code.
-type ProtoTemplate struct {
+type RawTemplate struct {
 	Name    string
 	Subject string
 	Text    string
@@ -18,10 +20,14 @@ type ProtoTemplate struct {
 
 type TemplatesFile struct {
 	PackageName string
-	Templates   []ProtoTemplate
+	TemplateDir string
+	File        string
+	Templates   []RawTemplate
 }
 
-func Render(tf TemplatesFile, w io.ReadWriter) error {
+func (tf TemplatesFile) Render(w io.Writer) error {
+	// make a "quote" function available inside our Go source template, so it can escape quote marks
+	// inside the email template content.
 	funcs := template.FuncMap{
 		"quote": strconv.Quote,
 	}
@@ -29,5 +35,15 @@ func Render(tf TemplatesFile, w io.ReadWriter) error {
 	if err != nil {
 		return err
 	}
-	return t.Execute(w, tf)
+	var b bytes.Buffer
+	err = t.Execute(&b, tf)
+	if err != nil {
+		return err
+	}
+	formatted, err := format.Source(b.Bytes())
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(formatted)
+	return err
 }

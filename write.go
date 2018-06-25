@@ -1,8 +1,6 @@
 package emailtemplates
 
 import (
-	"bytes"
-	"go/format"
 	"io"
 	"io/ioutil"
 	"os"
@@ -19,29 +17,25 @@ func WriteTemplatesToFile(fileName, templateDir, packageName string) error {
 		return err
 	}
 	defer f.Close()
-	return WriteTemplates(f, templateDir, packageName)
+	return WriteTemplates(f, path.Base(fileName), templateDir, packageName)
 }
 
-func WriteTemplates(w io.Writer, templateDir, packageName string) error {
-	ts, _ := getProtoTemplatesFromDir(templateDir)
-	tf := TemplatesFile{
-		PackageName: packageName,
-		Templates:   ts,
-	}
-
-	var b bytes.Buffer
-	Render(tf, &b)
-	formatted, err := format.Source(b.Bytes())
+func WriteTemplates(w io.Writer, baseName, templateDir, packageName string) error {
+	ts, err := getRawTemplatesFromDir(templateDir)
 	if err != nil {
 		return err
 	}
-	_, err = w.Write(formatted)
-	return err
+	return TemplatesFile{
+		PackageName: packageName,
+		TemplateDir: templateDir,
+		File:        baseName,
+		Templates:   ts,
+	}.Render(w)
 }
 
-func getProtoTemplatesFromDir(dir string) ([]ProtoTemplate, error) {
+func getRawTemplatesFromDir(dir string) ([]RawTemplate, error) {
 	templateNames, err := getSubdirectories(dir)
-	out := []ProtoTemplate{}
+	out := []RawTemplate{}
 	for _, tName := range templateNames {
 		subj, err := ioutil.ReadFile(path.Join(dir, tName, subjectFile))
 		if err != nil {
@@ -55,7 +49,7 @@ func getProtoTemplatesFromDir(dir string) ([]ProtoTemplate, error) {
 		if err != nil {
 			return out, err
 		}
-		out = append(out, ProtoTemplate{
+		out = append(out, RawTemplate{
 			Name:    tName,
 			Subject: string(subj),
 			Text:    string(txt),
