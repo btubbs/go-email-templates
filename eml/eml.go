@@ -20,7 +20,7 @@ func main() {
 				dir := c.String("templatedir")
 				packageName := c.String("packagename")
 				file := c.String("file")
-				return emailtemplates.WriteTemplatesToFile(file, dir, packageName)
+				return emailtemplates.WriteTemplatesToFile(file, dir, packageName, true)
 			},
 			Flags: []cli.Flag{
 				cli.StringFlag{

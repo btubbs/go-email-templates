@@ -5,9 +5,11 @@ package emailtemplates
 
 import (
 	"bytes"
+	"fmt"
 	"go/format"
 	"io"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -25,7 +27,7 @@ type TemplatesFile struct {
 	Templates   []RawTemplate
 }
 
-func (tf TemplatesFile) Render(w io.Writer) error {
+func (tf TemplatesFile) Render(w io.Writer, verbose bool) error {
 	// make a "quote" function available inside our Go source template, so it can escape quote marks
 	// inside the email template content.
 	funcs := template.FuncMap{
@@ -45,5 +47,17 @@ func (tf TemplatesFile) Render(w io.Writer) error {
 		return err
 	}
 	_, err = w.Write(formatted)
-	return err
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		var names []string
+		for _, n := range tf.Templates {
+			names = append(names, n.Name)
+		}
+		fmt.Printf("Templates written:\n%s\n", strings.Join(names, "\n"))
+	}
+
+	return nil
 }

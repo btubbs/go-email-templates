@@ -11,16 +11,16 @@ const subjectFile = "subject.txt"
 const txtFile = "content.txt"
 const htmlFile = "content.html"
 
-func WriteTemplatesToFile(fileName, templateDir, packageName string) error {
+func WriteTemplatesToFile(fileName, templateDir, packageName string, verbose bool) error {
 	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return WriteTemplates(f, path.Base(fileName), templateDir, packageName)
+	return WriteTemplates(f, path.Base(fileName), templateDir, packageName, verbose)
 }
 
-func WriteTemplates(w io.Writer, baseName, templateDir, packageName string) error {
+func WriteTemplates(w io.Writer, baseName, templateDir, packageName string, verbose bool) error {
 	ts, err := getRawTemplatesFromDir(templateDir)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func WriteTemplates(w io.Writer, baseName, templateDir, packageName string) erro
 		TemplateDir: templateDir,
 		File:        baseName,
 		Templates:   ts,
-	}.Render(w)
+	}.Render(w, verbose)
 }
 
 func getRawTemplatesFromDir(dir string) ([]RawTemplate, error) {
