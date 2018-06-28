@@ -12,7 +12,7 @@ const txtFile = "content.txt"
 const htmlFile = "content.html"
 
 func WriteTemplatesToFile(fileName, templateDir, packageName string, verbose bool) error {
-	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
 	if err != nil {
 		return err
 	}

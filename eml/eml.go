@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	emailtemplates "github.com/btubbs/go-email-templates"
@@ -41,5 +42,9 @@ func main() {
 			},
 		},
 	}
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
