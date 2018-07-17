@@ -26,11 +26,13 @@ func (t *Template) Render(data interface{}) (RenderedTemplate, error) {
 		return out, err
 	}
 	out.Subject = b.String()
+	b.Reset()
 	err = t.parsedText.Execute(&b, data)
 	if err != nil {
 		return out, err
 	}
 	out.Text = b.String()
+	b.Reset()
 	err = t.parsedHTML.Execute(&b, data)
 	if err != nil {
 		return out, err
